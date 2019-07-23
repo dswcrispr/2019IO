@@ -13,13 +13,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 2. 대분류 투입산출표(생산자가격_총거래표)를 바탕으로 총투입계수 및 국산투입계수, 생산유발계수 등 도출
 
-3. 
+3. 투입계수를 바탕으로 특정 부문의 산업구조를 파악
 
 4. 생산유발계수, 부가가치유발계수의 2010년, 2015년 연도별 비교 그래프(2015년 기준년 산업연관표 작성결과 당행 보도자료 참조)
 
 
 
-# 1.기본 세팅
+## 1.기본 세팅
 ```{r initial settings}
 rm(list=ls())
 setwd("c:/Users/user/Documents/2019IO")
@@ -78,6 +78,101 @@ B <- solve(I - A)
 
 ```
 
+
+## 3. 투입계수를 바탕으로 특정 부문의 산업구조를 파악
+
+```{r coeficient}
+# 입력값 설정
+n <- dim(A)[1] ## 투입계수 행렬의 크기 = 산업의 개수
+target <- 17 ## 분석대상 산업, ex) 전력, 가스 및 증기 : 17
+
+
+#파급경로 생성(단계별)
+T1 <- cbind(rep(target,n),seq(1,n)) #1단계 파급경로 행렬(n*2)
+
+T2 <- matrix(0,nrow=n^2,ncol=3)
+tem <- matrix(0,nrow=n^2,ncol=2)
+for (z in 1:n){
+  for (i in 1:dim(T1)[1]){
+    for(j in 1:dim(T1)[2]){
+      tem[n*(z-1)+i,j] <- T1[i,j]
+    }}}
+T2_new <- rep(seq(1,n), each=n^1)
+T2 <- cbind(tem,T2_new) #2단계 파급경로 행렬(n^2*3)
+
+T3 <- matrix(0,nrow=n^3,ncol=4)
+tem <- matrix(0,nrow=n^3,ncol=3)
+for (z in 1:n){
+  for (i in 1:dim(T2)[1]){
+    for(j in 1:dim(T2)[2]){
+      tem[n^2*(z-1)+i,j] <- T2[i,j]
+    }}}
+T3_new <- rep(seq(1,n), each=n^2)
+T3 <- cbind(tem,T3_new) #3단계 파급경로 행렬(n^3*4)
+
+T4 <- matrix(0,nrow=n^4,ncol=5)
+tem <- matrix(0,nrow=n^4,ncol=4)
+for (z in 1:n){
+  for (i in 1:dim(T3)[1]){
+    for(j in 1:dim(T3)[2]){
+      tem[n^3*(z-1)+i,j] <- T3[i,j]
+    }}}
+T4_new <- rep(seq(1,n), each=n^3)
+T4 <- cbind(tem,T4_new) #4단계 파급경로 행렬(n^4*5)
+
+
+#파급효과 계산(단계별)  * 파급효과: 각 단계별 투입계수의 곱
+
+V1 <- matrix(0,nrow=dim(T1)[1],ncol=1)
+for (m in 1:dim(T1)[1]){
+  V1[m,1] <- A[T1[m,2],T2[m,1]]
+}
+
+V2 <- matrix(0,nrow=dim(T2)[1],ncol=1)
+for (m in 1:dim(T2)[1]){
+  V2[m,1] <- A[T2[m,2],T2[m,1]]*A[T2[m,3],T2[m,2]]
+}
+
+V3 <- matrix(0,nrow=dim(T3)[1],ncol=1)
+for (m in 1:dim(T3)[1]){
+  V3[m,1] <- A[T3[m,2],T3[m,1]]*A[T3[m,3],T3[m,2]]*A[T3[m,4],T3[m,3]]
+}
+
+V4 <- matrix(0,nrow=dim(T4)[1],ncol=1)
+for (m in 1:dim(T4)[1]){
+  V4[m,1] <- A[T4[m,2],T4[m,1]]*A[T4[m,3],T4[m,2]]*A[T4[m,4],T4[m,3]]*A[T4[m,5],T4[m,4]]
+}
+
+#종합
+
+V <- rbind(V1,V2,V3,V4)
+x <- dim(V)
+
+T <- matrix(0,ncol=5,nrow=x)
+
+T[1:dim(V1)[1],1:2] <- T1
+
+r2a<-1+dim(V1)[1]
+r2z<-dim(V1)[1]+dim(V2)[1]
+T[r2a:r2z,1:3] <- T2
+
+r3a<-1+dim(V1)[1]+dim(V2)[1]
+r3z<-dim(V1)[1]+dim(V2)[1]+dim(V3)[1]
+T[r3a:r3z,1:4] <- T3
+
+r4a<-1+dim(V1)[1]+dim(V2)[1]+dim(V3)[1]
+r4z<-dim(V1)[1]+dim(V2)[1]+dim(V3)[1]+dim(V4)[1]
+T[r4a:r4z,1:5] <- T4
+
+final <- cbind(V,T) ## type : double
+dtfm <- data.frame(final) ## type : data frame
+colnames(dtfm)<-c("obj","s1","s2","s3","s4","s5")
+
+#결과 내보내기
+lookup<-arrange(dtfm,desc(obj))
+lookup[1:100,]
+
+```
 
 
 ## 4-1. 생산유발계수의 2010년, 2015년 연도별 비교 그래프(2015년 기준년 산업연관표 작성결과 당행 보도자료 참조)
