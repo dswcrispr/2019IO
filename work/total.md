@@ -339,16 +339,57 @@ head(production_inducement_tab)
 # 데이터 정리
 # 'X.','X','X.1' column을 통합하여 sector column을 생성
 production_inducement_tab <- production_inducement_tab %>% unite(col = 'sector', X.,X,X.1, sep = "")  
+head(production_inducement_tab)
+```
 
+    ##              sector X..1 X2000년.A. X..2 X2005년.B. X..3 X2010년.C. X..4
+    ## 1        농림수산품   ?       1.617   NA      1.733   NA      1.807   NA
+    ## 2            광산품   ?       1.617   NA      1.750   NA      1.769   NA
+    ## 3        공 산 품2)   ?       1.843   NA      1.904   NA      1.921   NA
+    ## 4        소 비 재2)   ?       2.040   NA      2.049   NA      2.088   NA
+    ## 5       ? 음식료품    ?       2.095   NA      2.078   NA      2.153   NA
+    ## 6 ? 섬유및가죽제품    ?       2.043   NA      2.037   NA      2.030   NA
+    ##   X2015년.D. X..5 차이.B.A. 차이.C.B. 차이.D.C.
+    ## 1      1.799   NA     0.116     0.073    -0.007
+    ## 2      1.836   NA     0.133     0.019     0.068
+    ## 3      1.952   NA     0.061     0.017     0.030
+    ## 4      2.069   NA     0.009     0.039    -0.019
+    ## 5      2.163   NA    -0.017     0.075     0.010
+    ## 6      1.961   NA    -0.006    -0.008    -0.069
+
+``` r
 # NA포함 column, 차이 변수 column을 제외하고 sector, 연도 column만을 선택 
 production_inducement_tab <- production_inducement_tab %>% select(sector, starts_with('X20'))
+head(production_inducement_tab)
+```
 
+    ##              sector X2000년.A. X2005년.B. X2010년.C. X2015년.D.
+    ## 1        농림수산품      1.617      1.733      1.807      1.799
+    ## 2            광산품      1.617      1.750      1.769      1.836
+    ## 3        공 산 품2)      1.843      1.904      1.921      1.952
+    ## 4        소 비 재2)      2.040      2.049      2.088      2.069
+    ## 5       ? 음식료품       2.095      2.078      2.153      2.163
+    ## 6 ? 섬유및가죽제품       2.043      2.037      2.030      1.961
+
+``` r
 # 연도 column의 이름 변경 
 production_inducement_tab <- production_inducement_tab %>% rename('2000년' = X2000년.A.,
                                           '2005년' = X2005년.B.,
                                           '2010년' = X2010년.C.,
                                           '2015년' = X2015년.D.)
 
+head(production_inducement_tab)
+```
+
+    ##              sector 2000년 2005년 2010년 2015년
+    ## 1        농림수산품  1.617  1.733  1.807  1.799
+    ## 2            광산품  1.617  1.750  1.769  1.836
+    ## 3        공 산 품2)  1.843  1.904  1.921  1.952
+    ## 4        소 비 재2)  2.040  2.049  2.088  2.069
+    ## 5       ? 음식료품   2.095  2.078  2.153  2.163
+    ## 6 ? 섬유및가죽제품   2.043  2.037  2.030  1.961
+
+``` r
 # 각주 행 삭제
 production_inducement_tab <- production_inducement_tab[c(-45 : -48), ]
 
@@ -357,6 +398,18 @@ production_inducement_tab$sector <- gsub('[?]', '', production_inducement_tab$se
 production_inducement_tab$sector <- gsub('2)', '', production_inducement_tab$sector)
 production_inducement_tab$sector <- gsub('3)', '', production_inducement_tab$sector)
 
+head(production_inducement_tab)
+```
+
+    ##             sector 2000년 2005년 2010년 2015년
+    ## 1       농림수산품  1.617  1.733  1.807  1.799
+    ## 2           광산품  1.617  1.750  1.769  1.836
+    ## 3         공 산 품  1.843  1.904  1.921  1.952
+    ## 4         소 비 재  2.040  2.049  2.088  2.069
+    ## 5        음식료품   2.095  2.078  2.153  2.163
+    ## 6  섬유및가죽제품   2.043  2.037  2.030  1.961
+
+``` r
 # 주요 산업 부분만 추리기
 production_inducement_tab_major <- production_inducement_tab[c(2, 3, 11, 16, 17, 18, 21), ]
 

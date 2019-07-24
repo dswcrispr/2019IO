@@ -189,15 +189,21 @@ head(production_inducement_tab)
 # 데이터 정리
 # 'X.','X','X.1' column을 통합하여 sector column을 생성
 production_inducement_tab <- production_inducement_tab %>% unite(col = 'sector', X.,X,X.1, sep = "")  
+head(production_inducement_tab)
+
 
 # NA포함 column, 차이 변수 column을 제외하고 sector, 연도 column만을 선택 
 production_inducement_tab <- production_inducement_tab %>% select(sector, starts_with('X20'))
+head(production_inducement_tab)
+
 
 # 연도 column의 이름 변경 
 production_inducement_tab <- production_inducement_tab %>% rename('2000년' = X2000년.A.,
                                           '2005년' = X2005년.B.,
                                           '2010년' = X2010년.C.,
                                           '2015년' = X2015년.D.)
+
+head(production_inducement_tab)
 
 # 각주 행 삭제
 production_inducement_tab <- production_inducement_tab[c(-45 : -48), ]
@@ -206,6 +212,8 @@ production_inducement_tab <- production_inducement_tab[c(-45 : -48), ]
 production_inducement_tab$sector <- gsub('[?]', '', production_inducement_tab$sector) 
 production_inducement_tab$sector <- gsub('2)', '', production_inducement_tab$sector)
 production_inducement_tab$sector <- gsub('3)', '', production_inducement_tab$sector)
+
+head(production_inducement_tab)
 
 # 주요 산업 부분만 추리기
 production_inducement_tab_major <- production_inducement_tab[c(2, 3, 11, 16, 17, 18, 21), ]
